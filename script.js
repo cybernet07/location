@@ -16,6 +16,53 @@ function addLog(text, type = 'info') {
     logsArea.scrollTop = logsArea.scrollHeight;
 }
 
+// ==============================
+// TAMBAHAN: KONVERSI KOORDINAT → ALAMAT
+// ==============================
+async function resolveAddress(latitude, longitude) {
+
+    addLog(`RESOLVING GPS COORDINATES TO ADDRESS...`, 'info');
+
+    try {
+        const url =
+            `https://nominatim.openstreetmap.org/reverse` +
+            `?format=jsonv2` +
+            `&lat=${encodeURIComponent(latitude)}` +
+            `&lon=${encodeURIComponent(longitude)}` +
+            `&zoom=18` +
+            `&addressdetails=1` +
+            `&accept-language=id`;
+
+        const response = await fetch(url, {
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (data.display_name) {
+
+            addLog(`ADDRESS RESOLVED: ${data.display_name}`, 'success');
+
+        } else {
+
+            addLog(`ADDRESS NOT FOUND FOR THESE COORDINATES.`, 'error');
+
+        }
+
+    } catch (error) {
+
+        console.error('Reverse geocoding error:', error);
+
+        addLog(`FAILED TO RESOLVE ADDRESS.`, 'error');
+    }
+}
+
 function handleFormSubmit(event) {
     event.preventDefault();
     
